@@ -67,7 +67,7 @@ The ResNet-based architectures were adapted for temporal data:
 
 ---
 
-## Initial Training Results and Discussion
+## Initial Training Results and Discussion (modeling_act_recog_KFold/eval.ipynb)
 
 ### Performance Across Observation Windows
 - Shorter windows (0.5s, 0.75s) achieved higher performance due to reduced temporal complexity.
@@ -80,7 +80,7 @@ The ResNet-based architectures were adapted for temporal data:
 
 ---
 
-## Knowledge Distillation for Pose Model Optimization
+## Knowledge Distillation for Pose Model Optimization (modeling_act_recog_KFold/kd_Pos_ResNet.ipynb)
 
 ### Motivation
 Position-only models reduce hardware dependency and are ideal for user-friendly systems like telerehabilitation.
