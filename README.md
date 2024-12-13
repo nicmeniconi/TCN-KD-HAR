@@ -89,7 +89,7 @@ The ResNet-based architectures were adapted for temporal data:
 - **Video_IMU input (AngPos_ResNet)**: Consistently outperformed single-modality models.
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalCV.png" alt="Student and Teacher training results" width="300" />
+  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalCV.png" alt="Student and Teacher training results" width="900" />
 </div>
 
 ---
