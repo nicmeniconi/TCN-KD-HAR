@@ -1,4 +1,4 @@
-# (Coming Soon) Optimizing Unimodal Human Activity Recognition TCNs with Knowledge Distillation
+# Optimizing Unimodal Human Activity Recognition TCNs with Knowledge Distillation
 
 Human Activity Recognition (HAR) plays a pivotal role in advancing applications across healthcare, gaming, and industrial automation. HAR models leverage data modalities such as positional, angular, and multimodal inputs to accurately and efficiently capture human movements. Understanding the strengths and limitations of each modality, along with innovative fusion methods, enables the development of robust and efficient HAR systems<sup>[1](#references)</sup>.
 
@@ -11,6 +11,7 @@ Human Activity Recognition (HAR) plays a pivotal role in advancing applications 
 - [Teacher Training and Student Pre-Training](#teacher-training-and-student-pre-training)
 - [Initial Training Results and Discussion](#initial-training-results-and-discussion)
 - [Knowledge Distillation for Pose Model Optimization](#knowledge-distillation-for-pose-model-optimization)
+- [External Repository Inclusion](#external-repository-inclusion)
 - [References](#references)
 
 ---
@@ -39,6 +40,22 @@ In this project, the unimodal students and the multimodal teachers were trained 
 ### Input Modalities and Data Preprocessing
 - **Dataset**: Joint position and angle data from the VIDIMU dataset.
   - **Alignment**: Video and IMU data were synchronized by minimizing the RMSE between joint angle signals after smoothing and resampling to a common frequency<sup>[7](#references)</sup>.
+  - **Joint Normalization**:
+    -	Joint positions were normalized relative to the pelvis joint (root), centering the skeleton in local space for consistent representation across samples.
+    -	The process involved subtracting the pelvis coordinates from all other joints to standardize positions within the frame.
+    -	This normalization ensures model invariance to global position and focuses on relative joint movements, critical for robust activity recognition.
+    - Below is a visualization of some joint position recordings from the dataset, plotted using `vidimu/jointviz/normalize_joints_and_gif_out.ipynb`:
+
+<div style="display: flex; justify-content: space-around;">
+  <img src="vidimu/jointviz/outs/skeleton_3d_normalized_A01_T01.gif" alt="Activity A01_T01" width="300" />
+  <img src="vidimu/jointviz/outs/skeleton_3d_normalized_A02_T01.gif" alt="Activity A02_T01" width="300" />
+  <img src="vidimu/jointviz/outs/skeleton_3d_normalized_A03_T02.gif" alt="Activity A03_T02" width="300" />
+</div>
+
+![Activity A01_T01](vidimu/jointviz/outs/skeleton_3d_normalized_A01_T01.gif)
+![Activity A02_T01](vidimu/jointviz/outs/skeleton_3d_normalized_A02_T01.gif)
+![Activity A03_T02](vidimu/jointviz/outs/skeleton_3d_normalized_A03_T02.gif)
+
 - **Preprocessing**: Min-max normalization was applied separately for each modality using training set statistics.
 
 ### Model Architectures
@@ -58,7 +75,7 @@ The ResNet-based architectures were adapted for temporal data:
 
 ---
 
-## Initial Training Results and Discussion (modeling_act_recog_KFold/eval.ipynb)
+## Training Results and Discussion
 
 ### Performance Across Observation Windows
 - Shorter windows (0.5s, 0.75s) achieved higher performance.
@@ -75,7 +92,7 @@ The ResNet-based architectures were adapted for temporal data:
 
 ---
 
-## Knowledge Distillation for Video Model Optimization (modeling_act_recog_KFold/kd_Pos_ResNet.ipynb)
+## Knowledge Distillation for Video Model Optimization
 
 ### Training Details (performed on a single fold)
 - **Teacher Model**: Trained on joint position and angle data.
@@ -97,6 +114,48 @@ The ResNet-based architectures were adapted for temporal data:
 - The student model surpassed the teacher, validating positional data as a robust modality for HAR.
 - This approach is scalable and ideal for cost-sensitive applications.
 
+### Discussion
+
+### Future Work
+
+---
+
+## How to Run and Analyze the Code
+
+1. Download the `VIDIMU` dataset.
+
+2. Generate synchronized data by running the `vidimu-tools/synchronize/CropAndCheckSync.ipynb` notebook. Make sure to reference the correct path to the `VIDIMU` folder. The notebook will synchronize the `videoandimus` and store it in the directory: `VIDIMU/dataset/videoandimusyncrop`
+
+3. Train models for HAR tasks:
+    - Student and teacher training:
+        - Adjust training parameters in `vidimu/modeling/run_gridsearchCV.sh` for grid search across different depths and time windows for both student and teacher models. Also define directories to store model outputs and training logs.
+        - Run grid search using command:
+        ```bash
+        bash vidimu/modeling/run_gridsearchCV.sh
+        ```
+    - Knowledge distillation:
+        - Adjust training parameters in `vidimu/modeling/run_gridsearchKD.sh` to train all video input students and video-and-imu teachers for all time window/depth pairs. Also define directories to store model outputs and training logs.
+        ```bash
+        bash vidimu/modeling/run_gridsearchKD.sh
+        ```
+4. Analyzing Results:
+    - Training and evaluation metrics (accuracy, precision, recall, F1-score) are logged within the CV and KD directories.
+    - Review student model results in the `vidimu/modeling/eval.ipynb` notebook for insights into performance across observation windows, model depths, and input modalities.
+    - Review knowledge distillation results in the `vidimu/modeling/eval_kd.ipynb` notebook for insights into performance across all observation window and depth pairs of student and teacher models.    
+
+---
+
+### External Repository Inclusion
+
+This project includes the code from the following external repository:
+
+- [vidimu-tools](https://github.com/twyncoder/vidimu-tools.git) (GNU General Public License v3.0)
+
+Modifications Made:
+
+- Added `vidimu-tools/synchronize/CropAndCheckSync.ipynb` to log additional synchronization information, crop and save synchronized data from subjects in the `VIDIMU/dataset/videoandimus` to `VIDIMU/dataset/videoandimusyncrop`.
+- Modified `vidimu-tools/utils/syncUtilities.py` and `vidimu-tools/utils/fileProcessing.py` to support 
+
 ---
 
 ## References
@@ -108,3 +167,4 @@ The ResNet-based architectures were adapted for temporal data:
 5. Kowshik Thopalli et al., "Advances in Computer Vision for Home-Based Stroke Rehabilitation" in Computer Vision: Challenges, Trends, and Opportunities, M. A. R. Ahad, M. Mahbub, M. Turk, and R. Hartley, Eds. Boca Raton, FL, USA: Routledge, 2024.
 6. Doe, J., et al. (2023). VIDIMU: A multimodal dataset for human activity recognition. Dataset release.
 7. twyncoder. (2023). vidimu-tools. GitHub. Retrieved from [https://github.com/twyncoder/vidimu-tools](https://github.com/twyncoder/vidimu-tools).
+
