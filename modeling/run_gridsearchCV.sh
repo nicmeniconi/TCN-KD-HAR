@@ -3,7 +3,7 @@
 # Parameters for the grid search
 seed=42
 dpath="/Volumes/Data_Drive/datasets/VIDIMU/dataset/videoandimusyncrop"
-out_path="/Volumes/Data_Drive/vidimu_gridsearch_out/gridsearch_test_11_26"
+out_path="/Volumes/Data_Drive/vidimu_gridsearch_out/gridsearch_11_4"
 activities_json='["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12", "A13"]'
 
 # secs=(0.5 0.75 1.5 4.0)

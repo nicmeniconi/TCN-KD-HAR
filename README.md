@@ -44,7 +44,9 @@ In this project, the unimodal students and the multimodal teachers were trained 
     -	Joint positions were normalized relative to the pelvis joint (root), centering the skeleton in local space for consistent representation across samples.
     -	The process involved subtracting the pelvis coordinates from all other joints to standardize positions within the frame.
     -	This normalization ensures model invariance to global position and focuses on relative joint movements, critical for robust activity recognition.
-    - Below is a visualization of some joint position recordings from the dataset, plotted using `vidimu/jointviz/normalize_joints_and_gif_out.ipynb`:
+  - **Preprocessing**: Min-max normalization was applied separately for each modality using training set statistics.
+
+Below is a visualization of some joint position recordings from the dataset, plotted using `vidimu/jointviz/normalize_joints_and_gif_out.ipynb`:
 
 <div style="display: flex; justify-content: space-around;">
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A01_T01.gif" alt="Activity A01_T01" width="300" />
@@ -53,11 +55,6 @@ In this project, the unimodal students and the multimodal teachers were trained 
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A04_T02.gif" alt="Activity A03_T02" width="300" />
 </div>
 
-<!-- ![Activity A01_T01](vidimu/jointviz/outs/skeleton_3d_normalized_A01_T01.gif)
-![Activity A02_T01](vidimu/jointviz/outs/skeleton_3d_normalized_A02_T01.gif)
-![Activity A03_T02](vidimu/jointviz/outs/skeleton_3d_normalized_A03_T02.gif) -->
-
-- **Preprocessing**: Min-max normalization was applied separately for each modality using training set statistics.
 
 ### Model Architectures
 The ResNet-based architectures were adapted for temporal data:
@@ -67,7 +64,7 @@ The ResNet-based architectures were adapted for temporal data:
 - **Observation Durations**: 0.5s, 0.75s, 1.5s, and 4.0s
 - **Number of Residual Blocks**: 1, 2, 7, 14
 
-### Training and Optimization
+### Student and Teacher Training and Optimization
 - **Loss Function**: Cross-Entropy Loss
 - **Optimizer**: Adam
 - **Scheduler**: ReduceLROnPlateau
@@ -90,6 +87,10 @@ The ResNet-based architectures were adapted for temporal data:
 - **Video input (Pos_ResNet)**: Strong with position-only data.
 - **IMU input (Ang_ResNet)**: Less effective for longer windows.
 - **Video_IMU input (AngPos_ResNet)**: Consistently outperformed single-modality models.
+
+<div style="display: flex; justify-content: space-around;">
+  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalCV.png" alt="Student and Teacher training results" width="300" />
+</div>
 
 ---
 
