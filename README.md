@@ -52,9 +52,9 @@ In this project, the unimodal students and the multimodal teachers were trained 
   <img src="vidimu/jointviz/outs/skeleton_3d_normalized_A03_T02.gif" alt="Activity A03_T02" width="300" />
 </div>
 
-![Activity A01_T01](vidimu/jointviz/outs/skeleton_3d_normalized_A01_T01.gif)
+<!-- ![Activity A01_T01](vidimu/jointviz/outs/skeleton_3d_normalized_A01_T01.gif)
 ![Activity A02_T01](vidimu/jointviz/outs/skeleton_3d_normalized_A02_T01.gif)
-![Activity A03_T02](vidimu/jointviz/outs/skeleton_3d_normalized_A03_T02.gif)
+![Activity A03_T02](vidimu/jointviz/outs/skeleton_3d_normalized_A03_T02.gif) -->
 
 - **Preprocessing**: Min-max normalization was applied separately for each modality using training set statistics.
 
