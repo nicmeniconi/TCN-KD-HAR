@@ -49,7 +49,8 @@ In this project, the unimodal students and the multimodal teachers were trained 
 <div style="display: flex; justify-content: space-around;">
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A01_T01.gif" alt="Activity A01_T01" width="300" />
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A02_T01.gif" alt="Activity A02_T01" width="300" />
-  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A03_T02.gif" alt="Activity A03_T02" width="300" />
+  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A09_T02.gif" alt="Activity A03_T02" width="300" />
+  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A04_T02.gif" alt="Activity A03_T02" width="300" />
 </div>
 
 <!-- ![Activity A01_T01](vidimu/jointviz/outs/skeleton_3d_normalized_A01_T01.gif)
