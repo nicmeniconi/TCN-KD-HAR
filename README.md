@@ -1,6 +1,8 @@
 # Optimizing Unimodal Human Activity Recognition TCNs with Knowledge Distillation
 
-Human Activity Recognition (HAR) plays a pivotal role in advancing applications across healthcare, gaming, and industrial automation. HAR models leverage data modalities such as positional, angular, and multimodal inputs to accurately and efficiently capture human movements. Understanding the strengths and limitations of each modality, along with innovative fusion methods, enables the development of robust and efficient HAR systems<sup>[1](#references)</sup>.
+This project focuses on optimizing Human Activity Recognition (HAR) models—specifically those using motion capture video data—through Knowledge Distillation (KD). We explore various model depths and observation windows of ResNet-like Temporal Convolutional Network models using the [**VIDIMU**](https://zenodo.org/records/8210563) dataset to evaluate the effectiveness of KD for improving unimodal HAR model performance.
+
+The outcome of this project contributes to the development of efficient HAR systems suitable for real-time applications while maintaining robustness and accuracy.
 
 ---
 
@@ -16,6 +18,8 @@ Human Activity Recognition (HAR) plays a pivotal role in advancing applications 
 
 ## Applications of Multimodal HAR Systems
 
+HAR plays a pivotal role in advancing applications across healthcare, gaming, and industrial automation. HAR models leverage data modalities such as positional, angular, and multimodal inputs to accurately and efficiently capture human movements. Understanding the strengths and limitations of each modality, along with innovative fusion methods, enables the development of robust and efficient HAR systems<sup>[1](#references)</sup>.
+
 Multimodal HAR systems enhance activity recognition in diverse domains:
 - **Tele-rehabilitation**: Remote patient monitoring with positional and angular data enables personalized therapy<sup>[2](#references)</sup>.
 - **Assistive Technologies**: Multimodal models improve real-time decision-making in devices like exoskeletons and prosthetics<sup>[3](#references)</sup>.
@@ -25,7 +29,7 @@ In the realm of physical rehabilitation, designing effective at-home rehabilitat
 
 ## Dataset and Approach
 
-The VIDIMU dataset<sup>[6](#references)</sup> is a multimodal collection of data on daily life activities aimed at advancing human activity recognition and biomechanics research. It includes data from 54 participants, with video recordings from a commodity camera and inertial measurement unit (IMU) data from 16 participants. The dataset captures 13 clinically relevant activities using affordable technology. Video data was processed to estimate 3D joint positions (sampled at 50Hz), while IMU data provided joint angles through inverse kinematics (sampled at 30Hz). The dataset is designed to support studies in movement recognition, kinematic analysis, and tele-rehabilitation in natural environments. In this study, we will explore the effectiveness of Knowledge Distillation (KD) for optimizing motion capture-based HAR student models using a multimodal motion capture and IMU-based HAR teacher model.
+The VIDIMU dataset<sup>[6](#references)</sup> is a multimodal collection of data on daily life activities aimed at advancing human activity recognition and biomechanics research. It includes data from 54 participants, with video recordings from a commodity camera and inertial measurement unit (IMU) data from 16 participants. The dataset captures 13 clinically relevant activities using affordable technology. Video data was processed to estimate 3D joint positions (sampled at 50Hz), while IMU data provided joint angles through inverse kinematics (sampled at 30Hz). The dataset is designed to support studies in movement recognition, kinematic analysis, and tele-rehabilitation in natural environments. In this study, we will explore the effectiveness of KD for optimizing motion capture-based HAR student models using a multimodal motion capture and IMU-based HAR teacher model.
 
 ## Teacher Training and Student Pre-Training
 
@@ -64,11 +68,15 @@ We employed a ResNet-based architecture for both student and teacher models, inc
 - **Cross Validation**: 5 folds
 - **Reproducibility**: a fixed seed was set for the training routines to ensure consistent and reproducible results
 
-## Training Results and Discussion
+## Results - Teacher Training and Student Pre-Training
+
+Below are the average accuracies of the best unimodal and multimodal models across 5 folds, for each depth and observation window combinations.
 
 <div style="display: flex; justify-content: space-around;">
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalCV.png" alt="Student and Teacher training results" width="1200" />
 </div>
+
+A more in-depth analysis of these models can be found in the `vidimu/modeling/eval.ipynb` notebook.
 
 ### Performance Across Observation Windows
 - Shorter windows (0.5s, 0.75s) achieved higher performance.
@@ -98,12 +106,18 @@ We employed a ResNet-based architecture for both student and teacher models, inc
   - **Temperature**: 5
   - **Reproducibility**: a fixed seed was set for the training routines to ensure consistent and reproducible results
 
-### Results
+### Results - Knowledge Distillation for Video Model Optimization
+
+Below are the accuracies of the untrained student, the teacher, the trained student, and the accuracy improvements achieved via KD for each depth and observation window combinations.
+
 <div style="display: flex; justify-content: space-around;">
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalKD.png" alt="Student and Teacher training results" width="1200" />
 </div>
 
-### Key Findings and Discussion
+A more in-depth analysis of these models can be found in the `vidimu/modeling/eval_kd.ipynb` notebook.
+
+### Discussion
+
 - In this experiment, we observe that KD provides marginal accuracy improvements for deeper models, and showed diminishing returns for shallow models. The largest performance gain was achieved by the deepest model (14 residual blocks) with the longest observation window (4.0s). 
 - In the context of this dataset, applications may prioritize shallower models with shorter observation windows for real-time implementation. However, for more complex HAR problems—such as those involving larger activity sets or activities requiring recognition over longer time periods—KD can be beneficial for enhancing the performance of unimodal input models.
 - Future improvements for shallow models could involve a grid search to optimize KD parameters (Alpha and Temperature) for each time window and model depth. Additionally, validating the current models using the unimodal subset (joint position data only) will help assess their ability to generalize to unseen subjects.
@@ -112,8 +126,8 @@ We employed a ResNet-based architecture for both student and teacher models, inc
 
 ## How to Run and Analyze the Code
 
-1. Download the `VIDIMU` dataset (https://zenodo.org/records/8210563).
-  - store `analysis.zip` and `dataset.zip` into a directory named `VIDIMU`, and unzip files.
+1. Download the [**VIDIMU**](https://zenodo.org/records/8210563) dataset.
+    - Store `analysis.zip` and `dataset.zip` into a directory named `VIDIMU`, and unzip files.
 
 2. Generate synchronized data by running the `vidimu-tools/synchronize/CropAndCheckSync.ipynb` notebook. Make sure to reference the correct path to the `VIDIMU` folder. The notebook will synchronize the `videoandimus` and store it in the directory: `VIDIMU/dataset/videoandimusyncrop`
 
