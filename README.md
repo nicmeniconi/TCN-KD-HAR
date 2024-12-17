@@ -105,12 +105,10 @@ The ResNet-based architectures were adapted for temporal data:
   - Alpha: 0.7
   - Temperature: 5
 
-### Evaluation
-- **Teacher Accuracy**: 87.78%
-- **Student Accuracy**: 90.50%
-- **Student Precision**: 92.65%
-- **Student Recall**: 90.90%
-- **Student F1-Score**: 91.50%
+### Results
+<div style="display: flex; justify-content: space-around;">
+  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalKD.png" alt="Student and Teacher training results" width="1200" />
+</div>
 
 ### Key Findings
 - The student model surpassed the teacher, validating positional data as a robust modality for HAR.
