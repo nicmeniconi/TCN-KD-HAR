@@ -6,12 +6,10 @@ dpath="/Volumes/Data_Drive/datasets/VIDIMU/dataset/videoandimusyncrop"
 out_path="/Volumes/Data_Drive/vidimu_gridsearch_out/gridsearch_11_4"
 activities_json='["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12", "A13"]'
 
-# secs=(0.5 0.75 1.5 4.0)
-secs=(0.5)
+secs=(0.5 0.75 1.5 4.0)
 split=0.8
 batch_size=32
-# epochs=200
-epochs=5
+epochs=200
 lr=1e-3
 factor=0.1
 patience=10
@@ -19,8 +17,7 @@ early_stop_patience=30
 cv_folds=5
 modelnames=("Pos_ResNet" "Ang_ResNet" "AngPos_ResNet")
 
-# depth=(1 2 7 14)
-depth=(1)
+depth=(1 2 7 14)
 
 mkdir -p "$out_path"
 echo "Save results to ${out_path}"

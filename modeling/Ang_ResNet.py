@@ -16,7 +16,6 @@ import multiprocessing
 multiprocessing.set_start_method('spawn', force=True)
 
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--seed", type=int, required=True)
 parser.add_argument("--dpath", type=str, required=True)
@@ -35,27 +34,22 @@ parser.add_argument("--early_stop_patience", type=int, required=True)
 parser.add_argument("--modelname", type=str, required=True)
 args = parser.parse_args()
 
-# Parse JSON-formatted activities list
 activities = json.loads(args.activities)
 num_classes = len(activities)
 
-# Load data
 secs = args.secs
 imu_window_size = int(secs * 50)
 video_window_size = int(secs * 30)
 print('IMU Data window size:', imu_window_size)
 print('Video Data window size:', video_window_size)
 
-# Define main function
 def main():
     activities = json.loads(args.activities)
     num_classes = len(activities)
     set_random_seed(args.seed)
     
-    # Initialize KFold here
     kf = KFold(n_splits=args.cv_folds, shuffle=True, random_state=args.seed)
 
-    # Dataset loading once for all folds
     ins='IMU'
     out='act'
     dataset = VIDIMU(args.dpath, 
@@ -73,34 +67,16 @@ def main():
                                                args.batch_size, 
                                                args.cv_folds, 
                                                args.seed)
-        # print(f"Starting fold {fold + 1}/{args.cv_folds}")
-        # set_random_seed(args.seed + fold)
 
-        # train_subset = Subset(dataset, train_idx)
-        # test_subset = Subset(dataset, test_idx)
-
-        # # Compute min-max scaling parameters on train set
-        # imu_min, imu_max, video_min, video_max = compute_scaling_params(dataset, train_idx, ins='IMU')
-
-        # # Partially bound collate function for scaling
-        # collate = partial(collate_fn, ins='IMU', out='act', imu_min=imu_min, imu_max=imu_max, video_min=video_min, video_max=video_max)
-
-        # # DataLoaders
-        # train_loader = DataLoader(train_subset, batch_size=args.batch_size, shuffle=True, collate_fn=collate, num_workers=0)
-        # test_loader = DataLoader(test_subset, batch_size=args.batch_size, shuffle=False, collate_fn=collate, num_workers=0)
-
-            # Get input shape for model initialization
         for in_batch, _ in train_loader:
             input_channels = in_batch.shape[1]
             break
 
-        # Model initialization
         model = models.TemporalResNet(input_channels, num_classes, num_blocks=args.depth)
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=args.factor, patience=args.patience)
 
-        # Start training
         train_model(model, train_loader, test_loader, criterion, optimizer, scheduler, args.modelname, args.seed, fold, num_epochs=args.epochs)
         print(f"Completed fold {fold + 1}/{args.cv_folds}\n")
 
@@ -122,12 +98,11 @@ def test_model(model, test_loader):
     precision, recall, f1, _ = precision_recall_fscore_support(all_labels, all_preds, average='weighted', zero_division=1)    
     return accuracy, precision, recall, f1
 
-# Update train_model function with early stopping
 def train_model(model, train_loader, test_loader, criterion, optimizer, scheduler, modelname, seed, fold, num_epochs=20):
     model.train()
     best_accuracy = 0.0
     best_model_filename = None
-    no_improvement_epochs = 0  # Track epochs with no improvement
+    no_improvement_epochs = 0 
 
     for epoch in range(num_epochs):
         total_loss = 0.0
@@ -150,7 +125,6 @@ def train_model(model, train_loader, test_loader, criterion, optimizer, schedule
 
         train_accuracy = correct_train / total_train
 
-        # Calculate test metrics
         test_accuracy, precision, recall, f1 = test_model(model, test_loader)
 
         print(f"Epoch [{epoch + 1}/{num_epochs}], "
@@ -165,9 +139,7 @@ def train_model(model, train_loader, test_loader, criterion, optimizer, schedule
         current_lr = optimizer.param_groups[0]['lr']
         print(f"Current learning rate: {current_lr:.1e}")
 
-        # Check if we have a new best accuracy
         if test_accuracy > best_accuracy:
-            # Save the model with the best test accuracy for the current fold
             if best_model_filename is not None and os.path.exists(best_model_filename):
                 os.remove(best_model_filename)
 
@@ -175,11 +147,10 @@ def train_model(model, train_loader, test_loader, criterion, optimizer, schedule
             best_model_filename = f'{args.model_out_path}/best_{modelname}_fold{fold+1}_{args.depth}_{args.secs}_{seed}_acc_{best_accuracy:.4f}.pth'
             torch.save(model.state_dict(), best_model_filename)
             print(f"New best model for fold {fold+1} saved as {best_model_filename}")
-            no_improvement_epochs = 0  # Reset counter on improvement
+            no_improvement_epochs = 0 
         else:
-            no_improvement_epochs += 1  # Increment if no improvement
+            no_improvement_epochs += 1 
 
-        # Early stopping check
         if no_improvement_epochs >= args.early_stop_patience:
             print(f"Early stopping triggered after {no_improvement_epochs} epochs without improvement.")
             break

@@ -16,7 +16,6 @@ import multiprocessing
 multiprocessing.set_start_method('spawn', force=True)
 
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--seed", type=int, required=True)
 parser.add_argument("--dpath", type=str, required=True)
