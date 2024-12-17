@@ -42,13 +42,13 @@ The VIDIMU dataset<sup>[6](#references)</sup> is a multimodal collection of data
     -	This normalization ensures model invariance to global position and focuses on relative joint movements, critical for robust activity recognition.
   - **Preprocessing**: Min-max normalization was applied separately for each modality using training set statistics.
 
-Below is a visualization of some joint position recordings from the dataset, plotted using `vidimu/jointviz/normalize_joints_and_gif_out.ipynb`:
+Below is a visualization of a sample of joint position recordings (Subject S40, activities A01, A02, A04, A09), plotted using `vidimu/jointviz/normalize_joints_and_gif_out.ipynb`:
 
 <div style="display: flex; justify-content: space-around;">
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A01_T01.gif" alt="Activity A01_T01" width="300" />
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A02_T01.gif" alt="Activity A02_T01" width="300" />
-  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A09_T02.gif" alt="Activity A03_T02" width="300" />
-  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A04_T02.gif" alt="Activity A03_T02" width="300" />
+  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A09_T02.gif" alt="Activity A09_T02" width="300" />
+  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/jointviz/outs/skeleton_3d_normalized_A04_T02.gif" alt="Activity A04_T02" width="300" />
 </div>
 
 
@@ -65,12 +65,12 @@ We employed a ResNet-based architecture for both student and teacher models, inc
 - **Optimizer**: Adam
 - **Scheduler**: ReduceLROnPlateau
 - **Early Stopping**: Patience of 30 epochs
-- **Cross Validation**: 5 folds
+- **Cross Validation (CV)**: 5 folds
 - **Reproducibility**: a fixed seed was set for the training routines to ensure consistent and reproducible results
 
 ## Results - Teacher Training and Student Pre-Training
 
-Below are the average accuracies of the best unimodal and multimodal models across 5 folds, for each depth and observation window combinations.
+Below are the average accuracies of the best unimodal and multimodal models across 5 CV folds, for each depth and observation window combinations.
 
 <div style="display: flex; justify-content: space-around;">
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalCV.png" alt="Student and Teacher training results" width="1200" />
@@ -93,7 +93,7 @@ A more in-depth analysis of these models can be found in the `vidimu/modeling/ev
 
 ---
 
-## Knowledge Distillation for Video Model Optimization
+## KD for Video Model Optimization
 
 ### Training Details 
 - **Models**: KD experiments were performed on the first fold of the cross validation experiments of every observation window and residual block number combinations.
@@ -106,7 +106,7 @@ A more in-depth analysis of these models can be found in the `vidimu/modeling/ev
   - **Temperature**: 5
   - **Reproducibility**: a fixed seed was set for the training routines to ensure consistent and reproducible results
 
-### Results - Knowledge Distillation for Video Model Optimization
+### Results - KD for Video Model Optimization
 
 Below are the accuracies of the untrained student, the teacher, the trained student, and the accuracy improvements achieved via KD for each depth and observation window combinations.
 
@@ -172,4 +172,10 @@ Modifications Made:
 5. Kowshik Thopalli et al., "Advances in Computer Vision for Home-Based Stroke Rehabilitation" in Computer Vision: Challenges, Trends, and Opportunities, M. A. R. Ahad, M. Mahbub, M. Turk, and R. Hartley, Eds. Boca Raton, FL, USA: Routledge, 2024.
 6. Doe, J., et al. (2023). VIDIMU: A multimodal dataset for human activity recognition. Dataset release.
 7. twyncoder. (2023). vidimu-tools. GitHub. Retrieved from [https://github.com/twyncoder/vidimu-tools](https://github.com/twyncoder/vidimu-tools).
+
+---
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0](LICENSE).
 
