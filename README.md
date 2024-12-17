@@ -14,8 +14,6 @@ Human Activity Recognition (HAR) plays a pivotal role in advancing applications 
 - [External Repository Inclusion](#external-repository-inclusion)
 - [References](#references)
 
----
-
 ## Applications of Multimodal HAR Systems
 
 Multimodal HAR systems enhance activity recognition in diverse domains:
@@ -25,15 +23,9 @@ Multimodal HAR systems enhance activity recognition in diverse domains:
 
 In the realm of physical rehabilitation, designing effective at-home rehabilitation technologies requires a focus on minimally intrusive methods. Vision-based techniques hold significant promise, as they avoid the need for on-body sensors that could hinder patient movement<sup>[5](#references)</sup>. This approach reduces the discomfort associated with traditional motion capture suits and provides a more natural environment for rehabilitation exercises, potentially increasing patient compliance. We will be exploring the effectiveness of Knowledge Distillation (KD) for optimizing video input HAR student using a multimodal video and motion HAR teacher.
 
----
-
 ## Dataset and Approach
 
-The VIDIMU dataset<sup>[6](#references)</sup> is a multimodal collection of data on daily life activities aimed at advancing human activity recognition and biomechanics research. It includes data from 54 participants, with video recordings from a commodity camera and inertial measurement unit (IMU) data from 16 participants. The dataset captures 13 clinically relevant activities using affordable technology. Video data was processed to estimate 3D joint positions, while IMU data provided joint angles through inverse kinematics. The dataset is designed to support studies in movement recognition, kinematic analysis, and tele-rehabilitation in natural environments.
-
-In this project, the unimodal students and the multimodal teachers were trained on the video and IMU data. After KD, the student models were evaluated on the video-only dataset, in order to measure the ability of these models to generalize across different subjects. 
-
----
+The VIDIMU dataset<sup>[6](#references)</sup> is a multimodal collection of data on daily life activities aimed at advancing human activity recognition and biomechanics research. It includes data from 54 participants, with video recordings from a commodity camera and inertial measurement unit (IMU) data from 16 participants. The dataset captures 13 clinically relevant activities using affordable technology. Video data was processed to estimate 3D joint positions, while IMU data provided joint angles through inverse kinematics. The dataset is designed to support studies in movement recognition, kinematic analysis, and tele-rehabilitation in natural environments. In this project, the unimodal students and the multimodal teachers were trained on the video and IMU data.
 
 ## Teacher Training and Student Pre-Training
 
@@ -71,8 +63,6 @@ The ResNet-based architectures were adapted for temporal data:
 - **Early Stopping**: Patience of 30 epochs
 - **Cross Validation**: 5 folds
 
----
-
 ## Training Results and Discussion
 
 ### Performance Across Observation Windows
@@ -96,12 +86,13 @@ The ResNet-based architectures were adapted for temporal data:
 
 ## Knowledge Distillation for Video Model Optimization
 
-### Training Details (performed on a single fold)
+### Training Details 
+- **Models**: Knowledge Distillation experiments were performed on the first fold of the cross validation experiments of every observation duration and residual block number combinations of the teacher (Video+IMU input) and the student (Video input only) models.
 - **Teacher Model**: Trained on joint position and angle data.
 - **Student Model**: Position-only, trained via Knowledge Distillation.
 - **Distillation Settings**:
-  - Time window: 4.0s
-  - Model depth: 14
+  - Observation Durations: 0.5s, 0.75s, 1.5s, and 4.0s
+  - Number of Residual Blocks: 1, 2, 7, 14
   - Alpha: 0.7
   - Temperature: 5
 
@@ -110,13 +101,10 @@ The ResNet-based architectures were adapted for temporal data:
   <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalKD.png" alt="Student and Teacher training results" width="1200" />
 </div>
 
-### Key Findings
-- The student model surpassed the teacher, validating positional data as a robust modality for HAR.
-- This approach is scalable and ideal for cost-sensitive applications.
-
-### Discussion
-
-### Future Work
+### Key Findings and Discussion
+- The student models surpass their teacher when the model is deeper. Significant improvements were made with the deepest model and the longest observation window. This approach is scalable and ideal for models with deeper and more complex structures.
+- In this experiment, we observe that KD provides marginal accuracy improvements for deeper models, and shows diminishing returns for shallow models. The best performance improvement was of the deepest model (14 residual blocks) with the longest observation window (4.0s). In the context of this dataset, applications may favor shallower models with shorter observation windows for the purposes of real-time implementation. But, in the case of a more complex HAR problem requiring the recognition of activities that are recognizable over longer periods of time, KD can be useful for improving the performance of unimodal input models. 
+- Further exploration can be done for improving the performance of the shallow models in our first experiment by changing the KD Alpha and Temperature parameters. We can also validate our current models using the other portion of the dataset, which only includes recordings of activity using motion capture, to validate the model's ability to recognize activity of unseen subjects. 
 
 ---
 
