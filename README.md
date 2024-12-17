@@ -21,17 +21,17 @@ Multimodal HAR systems enhance activity recognition in diverse domains:
 - **Assistive Technologies**: Multimodal models improve real-time decision-making in devices like exoskeletons and prosthetics<sup>[3](#references)</sup>.
 - **Human-Computer Interaction**: These systems support intuitive interfaces for gaming, virtual reality, and robotics<sup>[4](#references)</sup>. 
 
-In the realm of physical rehabilitation, designing effective at-home rehabilitation technologies requires a focus on minimally intrusive methods. Vision-based techniques hold significant promise, as they avoid the need for on-body sensors that could hinder patient movement<sup>[5](#references)</sup>. This approach reduces the discomfort associated with traditional motion capture suits and provides a more natural environment for rehabilitation exercises, potentially increasing patient compliance. We will be exploring the effectiveness of Knowledge Distillation (KD) for optimizing video input HAR student using a multimodal video and motion HAR teacher.
+In the realm of physical rehabilitation, designing effective at-home rehabilitation technologies requires a focus on minimally intrusive methods. Vision-based techniques hold significant promise, as they avoid the need for on-body sensors that could hinder patient movement<sup>[5](#references)</sup>. This approach reduces the discomfort associated with traditional motion capture suits and provides a more natural environment for rehabilitation exercises, potentially increasing patient compliance.
 
 ## Dataset and Approach
 
-The VIDIMU dataset<sup>[6](#references)</sup> is a multimodal collection of data on daily life activities aimed at advancing human activity recognition and biomechanics research. It includes data from 54 participants, with video recordings from a commodity camera and inertial measurement unit (IMU) data from 16 participants. The dataset captures 13 clinically relevant activities using affordable technology. Video data was processed to estimate 3D joint positions, while IMU data provided joint angles through inverse kinematics. The dataset is designed to support studies in movement recognition, kinematic analysis, and tele-rehabilitation in natural environments. In this project, the unimodal students and the multimodal teachers were trained on the video and IMU data.
+The VIDIMU dataset<sup>[6](#references)</sup> is a multimodal collection of data on daily life activities aimed at advancing human activity recognition and biomechanics research. It includes data from 54 participants, with video recordings from a commodity camera and inertial measurement unit (IMU) data from 16 participants. The dataset captures 13 clinically relevant activities using affordable technology. Video data was processed to estimate 3D joint positions (sampled at 50Hz), while IMU data provided joint angles through inverse kinematics (sampled at 30Hz). The dataset is designed to support studies in movement recognition, kinematic analysis, and tele-rehabilitation in natural environments. In this study, we will explore the effectiveness of Knowledge Distillation (KD) for optimizing motion capture-based HAR student models using a multimodal motion capture and IMU-based HAR teacher model.
 
 ## Teacher Training and Student Pre-Training
 
 ### Input Modalities and Data Preprocessing
 - **Dataset**: Joint position and angle data from the VIDIMU dataset.
-  - **Alignment**: Video and IMU data were synchronized by minimizing the RMSE between joint angle signals after smoothing and resampling to a common frequency<sup>[7](#references)</sup>.
+  - **Alignment**: Video and IMU data were synchronized by minimizing the RMSE between joint angle signals after smoothing and resampling to the IMU sampling frequency<sup>[7](#references)</sup>.
   - **Joint Normalization**:
     -	Joint positions were normalized relative to the pelvis joint (root), centering the skeleton in local space for consistent representation across samples.
     -	The process involved subtracting the pelvis coordinates from all other joints to standardize positions within the frame.
@@ -49,10 +49,10 @@ Below is a visualization of some joint position recordings from the dataset, plo
 
 
 ### Model Architectures
-The ResNet-based architectures were adapted for temporal data:
+We employed a ResNet-based architecture for both student and teacher models, incorporating Temporal Convolutional layers in place of standard Convolutional layers to effectively capture sequential dependencies in time-series data.
 - **Pos_ResNet**: Joint position input
 - **Ang_ResNet**: Joint angle input
-- **AngPos_ResNet**: Combined input via parallel streams
+- **AngPos_ResNet**: Combined joint position and angle input via parallel streams
 - **Observation Durations**: 0.5s, 0.75s, 1.5s, and 4.0s
 - **Number of Residual Blocks**: 1, 2, 7, 14
 
@@ -62,39 +62,41 @@ The ResNet-based architectures were adapted for temporal data:
 - **Scheduler**: ReduceLROnPlateau
 - **Early Stopping**: Patience of 30 epochs
 - **Cross Validation**: 5 folds
+- **Reproducibility**: a fixed seed was set for the training routines to ensure consistent and reproducible results
 
 ## Training Results and Discussion
 
+<div style="display: flex; justify-content: space-around;">
+  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalCV.png" alt="Student and Teacher training results" width="1200" />
+</div>
+
 ### Performance Across Observation Windows
 - Shorter windows (0.5s, 0.75s) achieved higher performance.
-- Longer windows (1.5s, 4.0s) showed diminishing returns.
+- Longer windows (1.5s, 4.0s) exhibited diminishing returns.
 
 ### Performance Across Model Depths
 - Shallow networks (1, 2) achieved higher performance.
-- Deep networks (7, 14) showed diminishing returns.
+- Deep networks (7, 14) exhibited diminishing returns.
 
 ### Model Comparison
 - **Video input (Pos_ResNet)**: Strong with position-only data.
 - **IMU input (Ang_ResNet)**: Less effective for longer windows.
 - **Video_IMU input (AngPos_ResNet)**: Consistently outperformed single-modality models.
 
-<div style="display: flex; justify-content: space-around;">
-  <img src="https://github.com/nicmeniconi/TCN-KD-HAR/blob/main/modeling/evalCV.png" alt="Student and Teacher training results" width="1200" />
-</div>
-
 ---
 
 ## Knowledge Distillation for Video Model Optimization
 
 ### Training Details 
-- **Models**: Knowledge Distillation experiments were performed on the first fold of the cross validation experiments of every observation duration and residual block number combinations of the teacher (Video+IMU input) and the student (Video input only) models.
+- **Models**: KD experiments were performed on the first fold of the cross validation experiments of every observation window and residual block number combinations.
 - **Teacher Model**: Trained on joint position and angle data.
-- **Student Model**: Position-only, trained via Knowledge Distillation.
+- **Student Model**: Position-only, fine-tuned via KD.
 - **Distillation Settings**:
-  - Observation Durations: 0.5s, 0.75s, 1.5s, and 4.0s
-  - Number of Residual Blocks: 1, 2, 7, 14
-  - Alpha: 0.7
-  - Temperature: 5
+  - **Observation Windows**: 0.5s, 0.75s, 1.5s, and 4.0s
+  - **Number of Residual Blocks**: 1, 2, 7, 14
+  - **Alpha**: 0.7
+  - **Temperature**: 5
+  - **Reproducibility**: a fixed seed was set for the training routines to ensure consistent and reproducible results
 
 ### Results
 <div style="display: flex; justify-content: space-around;">
@@ -102,27 +104,28 @@ The ResNet-based architectures were adapted for temporal data:
 </div>
 
 ### Key Findings and Discussion
-- The student models surpass their teacher when the model is deeper. Significant improvements were made with the deepest model and the longest observation window. This approach is scalable and ideal for models with deeper and more complex structures.
-- In this experiment, we observe that KD provides marginal accuracy improvements for deeper models, and shows diminishing returns for shallow models. The best performance improvement was of the deepest model (14 residual blocks) with the longest observation window (4.0s). In the context of this dataset, applications may favor shallower models with shorter observation windows for the purposes of real-time implementation. But, in the case of a more complex HAR problem requiring the recognition of activities that are recognizable over longer periods of time, KD can be useful for improving the performance of unimodal input models. 
-- Further exploration can be done for improving the performance of the shallow models in our first experiment by changing the KD Alpha and Temperature parameters. We can also validate our current models using the other portion of the dataset, which only includes recordings of activity using motion capture, to validate the model's ability to recognize activity of unseen subjects. 
+- In this experiment, we observe that KD provides marginal accuracy improvements for deeper models, and showed diminishing returns for shallow models. The largest performance gain was achieved by the deepest model (14 residual blocks) with the longest observation window (4.0s). 
+- In the context of this dataset, applications may prioritize shallower models with shorter observation windows for real-time implementation. However, for more complex HAR problems—such as those involving larger activity sets or activities requiring recognition over longer time periods—KD can be beneficial for enhancing the performance of unimodal input models.
+- Future improvements for shallow models could involve a grid search to optimize KD parameters (Alpha and Temperature) for each time window and model depth. Additionally, validating the current models using the unimodal subset (joint position data only) will help assess their ability to generalize to unseen subjects.
 
 ---
 
 ## How to Run and Analyze the Code
 
-1. Download the `VIDIMU` dataset.
+1. Download the `VIDIMU` dataset (https://zenodo.org/records/8210563).
+  - store `analysis.zip` and `dataset.zip` into a directory named `VIDIMU`, and unzip files.
 
 2. Generate synchronized data by running the `vidimu-tools/synchronize/CropAndCheckSync.ipynb` notebook. Make sure to reference the correct path to the `VIDIMU` folder. The notebook will synchronize the `videoandimus` and store it in the directory: `VIDIMU/dataset/videoandimusyncrop`
 
 3. Train models for HAR tasks:
     - Student and teacher training:
-        - Adjust training parameters in `vidimu/modeling/run_gridsearchCV.sh` for grid search across different depths and time windows for both student and teacher models. Also define directories to store model outputs and training logs.
+        - Adjust training parameters in `vidimu/modeling/run_gridsearchCV.sh` for grid search across different depths and observation windows for both student and teacher models. Update the path to specify the directory for storing model outputs and training logs.
         - Run grid search using command:
         ```bash
         bash vidimu/modeling/run_gridsearchCV.sh
         ```
     - Knowledge distillation:
-        - Adjust training parameters in `vidimu/modeling/run_gridsearchKD.sh` to train all video input students and video-and-imu teachers for all time window/depth pairs. Also define directories to store model outputs and training logs.
+        - Adjust training parameters in `vidimu/modeling/run_gridsearchKD.sh` to train all video input students and video-and-imu teachers for all observation window/model depth combinations. Update the path to specify the directory for storing model outputs and training logs.
         ```bash
         bash vidimu/modeling/run_gridsearchKD.sh
         ```
@@ -142,7 +145,7 @@ This project includes the code from the following external repository:
 Modifications Made:
 
 - Added `vidimu-tools/synchronize/CropAndCheckSync.ipynb` to log additional synchronization information, crop and save synchronized data from subjects in the `VIDIMU/dataset/videoandimus` to `VIDIMU/dataset/videoandimusyncrop`.
-- Modified `vidimu-tools/utils/syncUtilities.py` and `vidimu-tools/utils/fileProcessing.py` to support 
+- Modified `vidimu-tools/utils/syncUtilities.py` and `vidimu-tools/utils/fileProcessing.py` to support `vidimu-tools/synchronize/CropAndCheckSync.ipynb`.
 
 ---
 
